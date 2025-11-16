@@ -1,0 +1,36 @@
+apiVersion: monitoring.coreos.com/v1alpha1
+kind: AlertmanagerConfig
+metadata:
+  name: kafka-slack-alerts
+  namespace: monitoring
+  labels:
+    release: kube-prometheus-stack
+spec:
+  route:
+    receiver: "slack-notifications"
+    groupBy: ['alertname', 'team']
+    routes:
+      - matchers:
+          - name: team
+            value: streaming
+  receivers:
+    - name: "slack-notifications"
+      slackConfigs:
+        - sendResolved: true
+          channel: "#kafka-alerts"
+          username: "Kafka Alert Bot"
+          apiURL:
+            name: alertmanager-slack-app-webhook  # Secret containing the webhook
+            key: slack_api_url
+          title: "🚨 *{{ .CommonLabels.alertname }}*"
+          text: |
+            {{ range .Alerts }}
+            *Alert:* {{ .Labels.alertname }}
+            *Severity:* {{ .Labels.severity }}
+            *Topic:* {{ if .Labels.topic }}{{ .Labels.topic }}{{ else }}N/A{{ end }}
+            *Description:* {{ .Annotations.description }}
+            *Starts at:* {{ .StartsAt }}
+            *Ends at:* {{ .EndsAt }}
+            {{ end }}
+
+            

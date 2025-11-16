@@ -1,0 +1,50 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: kafka-observability-rules
+  namespace: monitoring
+  labels:
+    release: kube-prometheus-stack  # match the Prometheus instance label
+spec:
+  groups:
+    - name: kafka_recording_rules
+      interval: 1m
+      rules:
+        - record: job:kafka:messages_in_rate
+          expr: rate(confluent_kafka_server_received_records[5m])
+        - record: job:kafka:messages_out_rate
+          expr: rate(confluent_kafka_server_sent_records[5m])
+        - record: job:kafka:active_topics
+          expr: count(confluent_kafka_server_topic_log_size_bytes)
+
+    - name: kafka_alerts
+      rules:
+        - alert: KafkaConsumerLagHigh
+          expr: avg_over_time(confluent_kafka_server_consumer_lag_offsets[30m]) > 0
+          for: 2m
+          labels:
+            severity: warning
+            team: streaming
+            namespace: monitoring
+          annotations:
+            summary: "Kafka Consumer Lag High"
+            description: "Average consumer lag exceeded 100 for 10 minutes."
+        - alert: KafkaNoActiveTopics
+          expr: job:kafka:active_topics == 0
+          for: 10m
+          labels:
+            severity: critical
+            team: streaming
+          annotations:
+            summary: "No Active Topics"
+            description: "No topic metrics reported for 5 minutes — possible outage."
+        - alert: HighMessageRate
+          expr: job:kafka:messages_in_rate > 100
+          for: 5m
+          labels:
+            severity: warning
+            team: streaming
+            namespace: monitoring
+          annotations:
+            summary: "High Kafka message rate"
+            description: "Kafka job {{ $labels.job }} is processing over 100 msgs/sec for the last 5m."

@@ -1,0 +1,28 @@
+apiVersion: monitoring.coreos.com/v1alpha1
+kind: ScrapeConfig
+metadata:
+  name: confluent-cloud
+  namespace: monitoring
+  labels:
+    release: kube-prometheus-stack  # match the Prometheus instance label
+spec:
+  staticConfigs:
+    - targets:
+        - api.telemetry.confluent.cloud
+  scheme: HTTPS
+  metricsPath: /v2/metrics/cloud/export 
+  params:
+    "resource.kafka.id":
+      - lkc-qd3y06
+  scrapeInterval: 1m
+  scrapeTimeout: 1m
+  basicAuth:
+    username:
+      name: confluent-credentials
+      key: username
+    password:
+      name: confluent-credentials
+      key: password
+
+
+
