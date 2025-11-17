@@ -54,7 +54,10 @@ cd enterprise-observability-stack
 
 ```
 
-2. Create your Slack secret
+2. Update the secret API key pair with the confluent metrics API credentials
+
+
+3. Create your Slack secret
 ```bash
 kubectl create secret generic alertmanager-slack-webhook \
   --from-literal=SLACK_WEBHOOK_URL="https://hooks.slack.com/services/XXX/YYY/ZZZ" \
@@ -62,7 +65,7 @@ kubectl create secret generic alertmanager-slack-webhook \
 
 ```
 
-3. Apply the manifests
+4. Apply the manifests
 - If deploying manually
 ```bash
 kubectl apply -f prometheus/
@@ -79,7 +82,7 @@ kubectl apply -f argocd/application.yaml
 ArgoCD will sync the rest automatically.
 
 
-4. Grafana Dashboard
+5. Grafana Dashboard
 The dashboard is already packaged as a ConfigMap:
 ```bash
 grafana/dashboards/confluent-kafka-dashboard-cm-.yaml
