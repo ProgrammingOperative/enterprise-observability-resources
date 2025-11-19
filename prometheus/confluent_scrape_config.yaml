@@ -13,7 +13,7 @@ spec:
   metricsPath: /v2/metrics/cloud/export 
   params:
     "resource.kafka.id":
-      - lkc-qd3y06
+      - lkc-0p3y3q
   scrapeInterval: 1m
   scrapeTimeout: 1m
   basicAuth:
